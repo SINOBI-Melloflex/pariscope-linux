@@ -9,13 +9,14 @@ install -m644 assets/pariscope.png "$P/usr/share/icons/hicolor/256x256/apps/pari
 install -m644 assets/pariscope.desktop "$P/usr/share/applications/pariscope.desktop"
 install -m644 assets/pariscope.service "$P/lib/systemd/system/pariscope.service"
 install -m755 assets/pariscope "$P/usr/bin/pariscope"
+install -m755 assets/pariscope-app "$P/usr/bin/pariscope-app"
 cat > "$P/DEBIAN/control" <<EOF
 Package: pariscope
 Version: $VER
 Section: net
 Priority: optional
 Architecture: amd64
-Depends: nodejs (>= 18), iputils-ping
+Depends: nodejs (>= 18), iputils-ping, curl
 Maintainer: Velocity Tech <support@velocitytech.top>
 Homepage: https://velocitytech.top
 Description: Pariscope network monitoring and infrastructure map

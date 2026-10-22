@@ -36,6 +36,11 @@ function getDevice() {
       try { Object.values(os.networkInterfaces()).flat().forEach((n) => { if (n && !n.internal && n.mac && n.mac !== "00:00:00:00:00:00") macs += n.mac; }); } catch (e) {}
       done("fallback|" + os.hostname() + "|" + ((os.cpus()[0] || {}).model || "") + "|" + macs);
     };
+    if (process.platform !== "win32") {
+      let id = "";
+      for (const f of ["/etc/machine-id", "/var/lib/dbus/machine-id"]) { try { id = fs.readFileSync(f, "utf8").trim(); if (id) break; } catch (e) {} }
+      return id ? done("linux|" + id.toLowerCase()) : fallback();
+    }
     try {
       execFile("reg", ["query", "HKLM\\SOFTWARE\\Microsoft\\Cryptography", "/v", "MachineGuid", "/reg:64"], { windowsHide: true, timeout: 8000 }, (err, out) => {
         const m = /MachineGuid\s+REG_SZ\s+([0-9a-fA-F-]{16,})/.exec(String(out || ""));

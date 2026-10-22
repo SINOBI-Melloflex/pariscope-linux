@@ -8,6 +8,7 @@ User=pariscope
 WorkingDirectory=/opt/pariscope/app
 Environment=PARISCOPE_DATA=/var/lib/pariscope
 ExecStart=/usr/bin/node app.js
+AmbientCapabilities=CAP_NET_RAW
 Restart=always
 RestartSec=3
 

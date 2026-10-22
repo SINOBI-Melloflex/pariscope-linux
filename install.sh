@@ -35,6 +35,8 @@ install -Dm644 "$SRC/assets/pariscope.png" /usr/share/icons/hicolor/256x256/apps
 install -Dm644 "$SRC/assets/pariscope.desktop" /usr/share/applications/pariscope.desktop
 install -Dm644 "$SRC/assets/pariscope.service" /etc/systemd/system/pariscope.service
 install -Dm755 "$SRC/assets/pariscope" /usr/local/bin/pariscope
+install -Dm755 "$SRC/assets/pariscope-app" /usr/bin/pariscope-app
+update-desktop-database /usr/share/applications >/dev/null 2>&1 || true
 
 echo "==> Installing dependencies (1-2 minutes)"
 ( cd /opt/pariscope/app && npm install --omit=dev --no-audit --no-fund )

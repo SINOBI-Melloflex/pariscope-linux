@@ -4,11 +4,11 @@ case "${1:-status}" in
   start|stop|restart) sudo systemctl "$1" pariscope ;;
   status) systemctl status pariscope --no-pager ;;
   logs) journalctl -u pariscope -f ;;
-  open) xdg-open http://localhost:4000 ;;
+  open) exec /usr/bin/pariscope-app ;;
   update) curl -fsSL "https://raw.githubusercontent.com/$REPO/main/install.sh" | sudo bash ;;
   uninstall)
     sudo systemctl disable --now pariscope
-    sudo rm -rf /opt/pariscope /etc/systemd/system/pariscope.service /usr/local/bin/pariscope \
+    sudo rm -rf /opt/pariscope /etc/systemd/system/pariscope.service /usr/local/bin/pariscope /usr/bin/pariscope-app \
       /usr/share/applications/pariscope.desktop /usr/share/icons/hicolor/256x256/apps/pariscope.png
     echo "Removed. Your data is kept in /var/lib/pariscope" ;;
   *) echo "Usage: pariscope {start|stop|restart|status|logs|open|update|uninstall}" ;;

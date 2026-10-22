@@ -65,6 +65,7 @@ const isAvailable = () => !!info.latest && cmp(info.latest, currentVersion()) > 
 async function install() {
   if (dl.busy) return;
   if (!isAvailable()) throw new Error("No update is available");
+  if (process.platform !== "win32") { dl = { busy: false, pct: 0, stage: "", error: "On Linux, update with:  sudo pariscope update   (then the service restarts by itself)", done: false, file: "" }; return; }
   dl = { busy: true, pct: 0, stage: "Downloading...", error: "", done: false, file: "" };
   try {
     const dir = (function () { const home = path.join(os.homedir(), "Downloads"); const c = [fs.existsSync(home) ? home : "", path.join(DATA_DIR, "updates"), path.join(os.tmpdir(), "pariscope-update")]; for (const d of c) { if (!d) continue; try { fs.mkdirSync(d, { recursive: true }); fs.accessSync(d, fs.constants.W_OK); return d; } catch (e) {} } throw new Error("no folder to save the download"); })();

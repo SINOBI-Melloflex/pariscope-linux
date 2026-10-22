@@ -1,0 +1,10 @@
+* text=auto
+*.sh text eol=lf
+install.sh text eol=lf
+build-deb.sh text eol=lf
+assets/pariscope text eol=lf
+assets/pariscope-app text eol=lf
+assets/*.desktop text eol=lf
+assets/*.service text eol=lf
+*.png binary
+*.ico binary
