@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Pariscope
+Comment=Network Monitoring - Velocity Tech
+Exec=xdg-open http://localhost:4000
+Icon=pariscope
+Terminal=false
+Categories=Network;System;Monitor;

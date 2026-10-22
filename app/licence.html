@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pariscope - Activate</title>
+<style>
+*{box-sizing:border-box}html{color-scheme:dark}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#070b14;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.card{width:100%;max-width:440px;background:#0b1220;border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+h1{margin:0 0 4px;font-size:24px;font-weight:800;letter-spacing:.3px}
+.sub{color:#94a3b8;font-size:13px;margin:0 0 22px}
+label{display:block;font-size:11px;font-weight:700;letter-spacing:.8px;color:#94a3b8;margin-bottom:6px}
+input{width:100%;padding:13px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.4);color:#f8fafc;font:600 16px ui-monospace,Consolas,monospace;letter-spacing:1.5px;outline:none;text-transform:uppercase}
+input:focus{border-color:#8b5cf6}
+button{width:100%;margin-top:14px;padding:13px;border:0;border-radius:11px;cursor:pointer;color:#fff;font-weight:800;font-size:13px;letter-spacing:.8px;text-transform:uppercase;background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 6px 20px rgba(139,92,246,.45)}
+button:disabled{opacity:.55;cursor:wait}
+#msg{min-height:20px;margin-top:14px;font-size:13px;font-weight:700;line-height:1.4}
+.bad{color:#fb7185}.ok{color:#34d399}.wait{color:#cbd5e1}
+.foot{margin-top:22px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);color:#64748b;font-size:11.5px;line-height:1.5}
+.mono{font-family:ui-monospace,Consolas,monospace;color:#94a3b8}
+</style></head><body>
+<div class="card">
+  <h1>Pariscope</h1>
+  <p class="sub">Enter your licence key to unlock this PC.</p>
+  <label for="k">LICENCE KEY</label>
+  <input id="k" placeholder="XXXXX-XXXXX-XXXXX-XXXXX" autocomplete="off" spellcheck="false" autofocus>
+  <button id="b">Activate</button>
+  <div id="msg"></div>
+  <div class="foot">One licence works on one PC only. Need help or a new key? Contact your Pariscope provider and tell them your Device ID:<br><span class="mono" id="dev">...</span></div>
+</div>
+<script>
+var k=document.getElementById("k"),b=document.getElementById("b"),m=document.getElementById("msg"),dv=document.getElementById("dev");
+function say(t,c){m.className=c||"";m.textContent=t||""}
+function status(){return fetch("/api/licence/status",{cache:"no-store"}).then(function(r){return r.json()})}
+status().then(function(s){
+  dv.textContent=s.device||"-";
+  if(s.licensed&&s.status==="valid"){location.replace("/");return}
+  if(s.licensed){location.replace("/");return}
+  if(s.message&&s.status!=="locked")say(s.message,"bad");
+}).catch(function(){say("Cannot reach Pariscope on this PC. Please restart it.","bad")});
+function go(){
+  var v=k.value.trim();
+  if(!v){say("Please type your licence key.","bad");return}
+  b.disabled=true;say("Checking licence...","wait");
+  fetch("/api/licence/activate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({key:v})})
+    .then(function(r){return r.json()})
+    .then(function(j){
+      if(j.ok){say("Licence valid. Unlocking...","ok");setTimeout(function(){location.replace("/")},900)}
+      else{say(j.message||"Licence not valid.","bad");b.disabled=false}
+    }).catch(function(){say("Request failed. Please try again.","bad");b.disabled=false});
+}
+b.onclick=go;
+k.addEventListener("keydown",function(e){if(e.key==="Enter")go()});
+</script>
+</body></html>
