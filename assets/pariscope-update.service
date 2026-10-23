@@ -1,0 +1,7 @@
+[Unit]
+Description=Pariscope updater (runs as root, fixed GitHub source)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/pariscope-update-run
+TimeoutStartSec=1200

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Pariscope update runner. Started as root by pariscope-update.service when the app
+# writes /var/lib/pariscope/update.request. The source is fixed (GitHub); nothing comes from the app.
+REPO="SINOBI71/pariscope-linux"
+DATA="/var/lib/pariscope"
+REQ="$DATA/update.request"
+ST="$DATA/update-status.txt"
+PREV="/var/backups/pariscope-prev"
+
+rm -f "$REQ"
+echo "running" > "$ST"
+fail() { echo "fail: $1" > "$ST"; exit 1; }
+
+TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+curl -fsSL --retry 3 --max-time 120 "https://raw.githubusercontent.com/$REPO/main/install.sh" -o "$TMP/install.sh" \
+  || fail "Could not download the update from GitHub. Check the internet and try again."
+head -n 1 "$TMP/install.sh" | grep -q '^#!/usr/bin/env bash' || fail "The downloaded update file looks wrong. Nothing was changed."
+bash -n "$TMP/install.sh" || fail "The downloaded update file has an error. Nothing was changed."
+
+rm -rf "$PREV"; mkdir -p /var/backups
+cp -a /opt/pariscope "$PREV" 2>/dev/null || fail "Could not make a backup. Nothing was changed."
+
+rollback() {
+  systemctl stop pariscope 2>/dev/null || true
+  rm -rf /opt/pariscope
+  cp -a "$PREV" /opt/pariscope
+  chown -R pariscope:pariscope /opt/pariscope /var/lib/pariscope 2>/dev/null || true
+  systemctl start pariscope 2>/dev/null || true
+}
+
+if ! bash "$TMP/install.sh" > "$DATA/update.log" 2>&1; then
+  rollback
+  fail "The update failed and the old version was restored. Details: /var/lib/pariscope/update.log"
+fi
+
+ok=0
+for _ in $(seq 1 60); do
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:4000/ 2>/dev/null || true)"
+  if [ -n "$code" ] && [ "$code" != "000" ]; then ok=1; break; fi
+  sleep 1
+done
+if [ "$ok" -ne 1 ]; then rollback; fail "The new version did not start, so the old version was restored."; fi
+echo "ok" > "$ST"
+exit 0

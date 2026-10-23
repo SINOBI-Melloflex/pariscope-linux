@@ -42,6 +42,9 @@ install -Dm644 "$SRC/assets/pariscope.png" /usr/share/icons/hicolor/256x256/apps
 install -Dm644 "$SRC/assets/pariscope.png" /usr/share/pixmaps/pariscope.png
 install -Dm644 "$SRC/assets/pariscope.desktop" /usr/share/applications/pariscope.desktop
 install -Dm644 "$SRC/assets/pariscope.service" /etc/systemd/system/pariscope.service
+install -Dm644 "$SRC/assets/pariscope-update.service" /etc/systemd/system/pariscope-update.service
+install -Dm644 "$SRC/assets/pariscope-update.path" /etc/systemd/system/pariscope-update.path
+install -Dm755 "$SRC/assets/pariscope-update-run" /usr/local/sbin/pariscope-update-run
 install -Dm755 "$SRC/assets/pariscope" /usr/local/bin/pariscope
 install -Dm755 "$SRC/assets/pariscope-app" /usr/bin/pariscope-app
 update-desktop-database /usr/share/applications >/dev/null 2>&1 || true
@@ -52,6 +55,7 @@ chown -R pariscope:pariscope /opt/pariscope /var/lib/pariscope
 
 systemctl daemon-reload
 systemctl enable --now pariscope
+systemctl enable --now pariscope-update.path || true
 command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -f /usr/share/icons/hicolor >/dev/null 2>&1 || true
 
 echo

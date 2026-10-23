@@ -1,0 +1,9 @@
+[Unit]
+Description=Pariscope update request watcher
+
+[Path]
+PathExists=/var/lib/pariscope/update.request
+Unit=pariscope-update.service
+
+[Install]
+WantedBy=multi-user.target

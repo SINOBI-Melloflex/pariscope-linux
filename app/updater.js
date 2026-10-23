@@ -42,7 +42,7 @@ function open(url, hops) {
   });
 }
 
-async function getManifest() {
+async function getManifest() { if (process.platform === "linux") return getLinuxManifest();
   const res = await open(MANIFEST_URL, 0);
   let n = 0; const chunks = [];
   for await (const c of res) { n += c.length; if (n > 100000) { res.destroy(); throw new Error("update page too large"); } chunks.push(c); }
@@ -56,7 +56,32 @@ async function getManifest() {
   return { latest: String(j.latest), notes: String(j.notes || "").slice(0, 600), url: u.href, sha256: String(j.sha256).toLowerCase(), readme: readme };
 }
 
-async function check() {
+async function getLinuxManifest() {
+  const res = await open("https://raw.githubusercontent.com/SINOBI71/pariscope-linux/main/app/version.txt", 0);
+  let n = 0; const chunks = [];
+  for await (const c of res) { n += c.length; if (n > 2000) { res.destroy(); throw new Error("version file too large"); } chunks.push(c); }
+  const v = Buffer.concat(chunks).toString("utf8").replace(/^\uFEFF/, "").trim();
+  if (!/^\d+(\.\d+){1,3}$/.test(v)) throw new Error("GitHub has no valid version");
+  return { latest: v, notes: "Linux update from GitHub.", url: "", sha256: "", readme: "" };
+}
+function linuxInstall() {
+  const REQ = path.join(DATA_DIR, "update.request"), ST = path.join(DATA_DIR, "update-status.txt");
+  if (!fs.existsSync("/etc/systemd/system/pariscope-update.path")) {
+    dl = { busy: false, pct: 0, stage: "", error: "One-time step: run   sudo pariscope update   in a terminal. After that the Update button works by itself.", done: false, file: "" };
+    return;
+  }
+  try { fs.unlinkSync(ST); } catch (e) {}
+  try { fs.writeFileSync(REQ, String(info.latest)); }
+  catch (e) { dl = { busy: false, pct: 0, stage: "", error: "Could not ask for the update: " + String((e && e.message) || e), done: false, file: "" }; return; }
+  dl = { busy: true, pct: 10, stage: "Updating Pariscope. It restarts by itself, please wait...", error: "", done: false, file: "" };
+  const t0 = Date.now();
+  const iv = setInterval(() => {
+    let s = ""; try { s = fs.readFileSync(ST, "utf8").trim(); } catch (e) {}
+    if (/^fail/i.test(s)) { clearInterval(iv); dl.error = s.replace(/^fail:?\s*/i, "") || "Update failed. The old version was restored."; dl.busy = false; }
+    else if (Date.now() - t0 > 15 * 60 * 1000) { clearInterval(iv); dl.error = "The update service did not answer. Run:  sudo pariscope update"; dl.busy = false; }
+    else if (dl.pct < 90) dl.pct += 2;
+  }, 2000);
+}async function check() {
   try { const m = await getManifest(); info = { latest: m.latest, notes: m.notes, url: m.url, sha256: m.sha256, readme: m.readme, checkedAt: Date.now(), error: "" }; }
   catch (e) { info.error = String((e && e.message) || e); info.checkedAt = Date.now(); }
 }
@@ -65,7 +90,7 @@ const isAvailable = () => !!info.latest && cmp(info.latest, currentVersion()) > 
 async function install() {
   if (dl.busy) return;
   if (!isAvailable()) throw new Error("No update is available");
-  if (process.platform !== "win32") { dl = { busy: false, pct: 0, stage: "", error: "On Linux, update with:  sudo pariscope update   (then the service restarts by itself)", done: false, file: "" }; return; }
+  if (process.platform !== "win32") return linuxInstall();
   dl = { busy: true, pct: 0, stage: "Downloading...", error: "", done: false, file: "" };
   try {
     const dir = (function () { const home = path.join(os.homedir(), "Downloads"); const c = [fs.existsSync(home) ? home : "", path.join(DATA_DIR, "updates"), path.join(os.tmpdir(), "pariscope-update")]; for (const d of c) { if (!d) continue; try { fs.mkdirSync(d, { recursive: true }); fs.accessSync(d, fs.constants.W_OK); return d; } catch (e) {} } throw new Error("no folder to save the download"); })();
