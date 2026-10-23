@@ -1,12 +1,13 @@
 [Desktop Entry]
 Type=Application
+Version=1.0
 Name=Pariscope
 GenericName=Network Monitor
-Comment=Network Monitoring - Velocity Tech
+Comment=Monitor routers, switches, servers and CCTV
 Exec=/usr/bin/pariscope-app
 Icon=pariscope
 Terminal=false
 Categories=Network;Monitor;System;
-StartupWMClass=Pariscope
+Keywords=network;monitor;snmp;cctv;ping;pariscope;
 StartupNotify=true
-Keywords=network;monitor;ping;snmp;
+StartupWMClass=Pariscope

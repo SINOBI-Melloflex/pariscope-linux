@@ -1,24 +1,23 @@
 #!/usr/bin/env bash
-# Pariscope launcher: makes sure the background service is running, then opens the UI as an app window.
 URL="http://localhost:4000"
-up() { curl -fs -o /dev/null --max-time 2 "$URL/" 2>/dev/null; }
-if ! up; then
-  if [ "$(id -u)" -eq 0 ]; then systemctl start pariscope
-  elif command -v pkexec >/dev/null 2>&1 && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then pkexec systemctl start pariscope
-  else sudo systemctl start pariscope; fi
-  for _ in $(seq 1 40); do up && break; sleep 0.5; done
+
+# service bondho thakle chalu koro
+if ! systemctl is-active --quiet pariscope; then
+  systemctl start pariscope 2>/dev/null || pkexec systemctl start pariscope 2>/dev/null || true
 fi
-if ! up; then
-  MSG="Pariscope service did not start. Run: pariscope logs"
-  command -v notify-send >/dev/null 2>&1 && notify-send "Pariscope" "$MSG" || echo "$MSG" >&2
-  exit 1
-fi
-for b in google-chrome google-chrome-stable chromium chromium-browser brave-browser microsoft-edge vivaldi; do
+
+# server ready howa porjonto max 40 sec opekkha
+for _ in $(seq 1 40); do
+  curl -fs -o /dev/null "$URL" && break
+  sleep 1
+done
+
+# Chromium-based browser thakle alada app window
+for b in google-chrome google-chrome-stable chromium chromium-browser microsoft-edge microsoft-edge-stable brave-browser; do
   if command -v "$b" >/dev/null 2>&1; then
-    exec "$b" --app="$URL" --class=Pariscope --user-data-dir="${XDG_DATA_HOME:-$HOME/.local/share}/pariscope-app" --no-first-run --no-default-browser-check
+    exec "$b" --app="$URL" --class=Pariscope --user-data-dir="$HOME/.config/pariscope-app" --no-first-run --no-default-browser-check
   fi
 done
-for b in /snap/bin/chromium /var/lib/flatpak/exports/bin/org.chromium.Chromium /var/lib/flatpak/exports/bin/com.google.Chrome; do
-  [ -x "$b" ] && exec "$b" --app="$URL"
-done
+
+# na thakle normal browser
 exec xdg-open "$URL"
