@@ -1,0 +1,15 @@
+[Unit]
+Description=Pariscope alert engine (WhatsApp and Telegram notifications)
+After=pariscope.service
+Wants=pariscope.service
+
+[Service]
+User=pariscope
+WorkingDirectory=/opt/pariscope/app
+Environment=PARISCOPE_DATA=/var/lib/pariscope
+ExecStart=/usr/bin/node voice-watcher.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

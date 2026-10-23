@@ -7,8 +7,8 @@ case "${1:-status}" in
   open) exec /usr/bin/pariscope-app ;;
   update) curl -fsSL "https://raw.githubusercontent.com/$REPO/main/install.sh" | sudo bash ;;
   uninstall)
-    sudo systemctl disable --now pariscope-update.path 2>/dev/null || true; sudo systemctl disable --now pariscope
-    sudo rm -rf /opt/pariscope /etc/systemd/system/pariscope.service /etc/systemd/system/pariscope-update.service /etc/systemd/system/pariscope-update.path /usr/local/sbin/pariscope-update-run /usr/local/bin/pariscope /usr/bin/pariscope-app \
+    sudo systemctl disable --now pariscope-update.path 2>/dev/null || true; sudo systemctl disable --now pariscope-alerts 2>/dev/null || true; sudo systemctl disable --now pariscope
+    sudo rm -rf /opt/pariscope /etc/systemd/system/pariscope.service /etc/systemd/system/pariscope-update.service /etc/systemd/system/pariscope-update.path /usr/local/sbin/pariscope-update-run /etc/systemd/system/pariscope-alerts.service /usr/local/bin/pariscope /usr/bin/pariscope-app \
       /usr/share/applications/pariscope.desktop /usr/share/icons/hicolor/256x256/apps/pariscope.png
     echo "Removed. Your data is kept in /var/lib/pariscope" ;;
   *) echo "Usage: pariscope {start|stop|restart|status|logs|open|update|uninstall}" ;;

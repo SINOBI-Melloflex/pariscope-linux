@@ -26,6 +26,7 @@ rollback() {
   cp -a "$PREV" /opt/pariscope
   chown -R pariscope:pariscope /opt/pariscope /var/lib/pariscope 2>/dev/null || true
   systemctl start pariscope 2>/dev/null || true
+  systemctl start pariscope-alerts 2>/dev/null || true
 }
 
 if ! bash "$TMP/install.sh" > "$DATA/update.log" 2>&1; then

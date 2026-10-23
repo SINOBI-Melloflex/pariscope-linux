@@ -15,7 +15,7 @@ done
 # Chromium-based browser thakle alada app window
 for b in google-chrome google-chrome-stable chromium chromium-browser microsoft-edge microsoft-edge-stable brave-browser; do
   if command -v "$b" >/dev/null 2>&1; then
-    exec "$b" --app="$URL" --class=Pariscope --user-data-dir="$HOME/.config/pariscope-app" --no-first-run --no-default-browser-check
+    exec "$b" --app="$URL" --class=Pariscope --user-data-dir="$HOME/.config/pariscope-app" --no-first-run --no-default-browser-check --autoplay-policy=no-user-gesture-required --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows
   fi
 done
 

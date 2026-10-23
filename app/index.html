@@ -520,7 +520,7 @@ body{background:radial-gradient(900px 500px at 12% -5%,rgba(139,92,246,.22),tran
       if (voiceActive) {
         btn.className = "voice-floating active";
         btn.innerHTML = "🔊 Voice Alerts: ON";
-        queueSpeech("Hey Sir. Welcome to Pariscope monitoring arena.");
+        queueSpeech("Hey Sir. Welcome to Pariscope monitoring arena."); setTimeout(function () { try { if (!window.speechSynthesis || window.speechSynthesis.getVoices().length === 0) alert("Voice engine not found on this computer. Open a terminal and run:  sudo pariscope update  then reopen Pariscope."); } catch (e) {} }, 2500);
       } else {
         btn.className = "voice-floating";
         btn.innerHTML = "🔇 Voice Alerts: OFF";
